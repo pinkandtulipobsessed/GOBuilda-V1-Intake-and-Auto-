@@ -1,0 +1,38 @@
+package org.firstinspires.ftc.teamcode;
+
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.CRServo;
+
+@TeleOp(name = "SideServosTeleOp")
+public class SideServosTeleOp extends LinearOpMode {
+
+    private CRServo left_servo;
+    private CRServo right_servo;
+
+    @Override
+    public void runOpMode() {
+
+        left_servo = hardwareMap.get(CRServo.class, "left_servo");
+        right_servo = hardwareMap.get(CRServo.class, "right_servo");
+
+        left_servo.setPower(0);
+        right_servo.setPower(0);
+
+        telemetry.addLine("Side Servos Ready");
+        telemetry.addLine("Both servos run continuously");
+        telemetry.update();
+
+        waitForStart();
+
+        while (opModeIsActive()) {
+
+            left_servo.setPower(0.7);
+            right_servo.setPower(0.7);
+
+        }
+
+        left_servo.setPower(0);
+        right_servo.setPower(0);
+    }
+}
