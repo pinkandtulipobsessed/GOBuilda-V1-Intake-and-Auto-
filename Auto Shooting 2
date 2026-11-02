@@ -1,0 +1,170 @@
+
+package org.firstinspires.ftc.teamcode;
+
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.CRServo;
+
+@Autonomous(name = "Anika_Autonomous_Shoot_and_Park")
+public class Windmill_Updated_Isnika extends LinearOpMode {
+
+private DcMotor left_front;
+private DcMotor left_back;
+private DcMotor right_back;
+private DcMotor right_front;
+private DcMotor shooter;
+private CRServo windmill;
+
+@Override
+public void runOpMode() {
+
+double POWER = -0.5;
+
+// Initialize hardware
+left_front = hardwareMap.get(DcMotor.class, "left_front");
+left_back = hardwareMap.get(DcMotor.class, "left_back");
+right_back = hardwareMap.get(DcMotor.class, "right_back");
+right_front = hardwareMap.get(DcMotor.class, "right_front");
+shooter = hardwareMap.get(DcMotor.class, "shooter");
+windmill = hardwareMap.get(CRServo.class, "windmill");
+
+// Set motor directions
+left_front.setDirection(DcMotor.Direction.REVERSE);
+left_back.setDirection(DcMotor.Direction.REVERSE);
+right_back.setDirection(DcMotor.Direction.FORWARD);
+right_front.setDirection(DcMotor.Direction.FORWARD);
+
+// Set braking behavior
+left_front.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+left_back.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+right_front.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+right_back.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+// Initial status
+telemetry.addData("Status", "Ready - Hive Shoot and Park");
+telemetry.update();
+
+shooter.setPower(0);
+windmill.setPower(0);
+
+waitForStart();
+
+if (isStopRequested()) {
+  stopAll();
+  return;
+}
+
+// 1. Shoot into hive
+shooter.setPower(0.50);
+sleep(4000);
+windmill.setPower(-0.50);
+sleep(4000);
+
+windmill.setPower(0);
+shooter.setPower(0);
+sleep(500);
+
+if (isStopRequested()) {
+ stopAll();
+ return;
+}
+
+// 2. Drive forward toward the hive
+left_front.setPower(POWER);
+left_back.setPower(POWER);
+right_front.setPower(POWER);
+right_back.setPower(POWER);
+sleep(200);
+
+if (isStopRequested()) {
+ stopAll();
+ return;
+}
+
+// 3. Turn left
+right_front.setPower(-POWER);
+right_back.setPower(-POWER);
+left_back.setPower(POWER);
+left_front.setPower(POWER);
+sleep(400);
+
+if (isStopRequested()) {
+ stopAll();
+ return;
+}
+
+// 4. Drive forward toward the loading zone
+left_front.setPower(POWER);
+left_back.setPower(POWER);
+right_front.setPower(POWER);
+right_back.setPower(POWER);
+sleep(900);
+
+if (isStopRequested()) {
+ stopAll();
+return;
+}
+
+// 5. Turn right
+right_front.setPower(POWER);
+right_back.setPower(POWER);
+left_back.setPower(-POWER);
+left_front.setPower(-POWER);
+sleep(400);
+
+if (isStopRequested()) {
+stopAll();
+return;
+}
+
+// 6. Drive forward toward the loading zone
+left_front.setPower(POWER);
+left_back.setPower(POWER);
+right_front.setPower(POWER);
+right_back.setPower(POWER);
+sleep(1750);
+
+if (isStopRequested()) {
+stopAll();
+return;
+}
+
+// 7. Turn left
+right_front.setPower(-0.5*POWER);
+right_back.setPower(-0.5*POWER);
+left_back.setPower(0.5*POWER);
+left_front.setPower(0.5*POWER);
+sleep(500);
+
+if (isStopRequested()) {
+stopAll();
+return;
+}
+
+// 8. Drive forward toward the loading zone
+left_front.setPower(0.5*POWER);
+left_back.setPower(0.5*POWER);
+right_front.setPower(0.5*POWER);
+right_back.setPower(0.5*POWER);
+sleep(1200);
+
+// 9. Stop everything
+stopAll();
+
+telemetry.addData("Status", "Auto done");
+telemetry.update();
+
+sleep(300);
+}
+
+// Stop all motors and servos
+private void stopAll() {
+left_front.setPower(0);
+left_back.setPower(0);
+right_front.setPower(0);
+right_back.setPower(0);
+shooter.setPower(0);
+windmill.setPower(0);
+}
+}
