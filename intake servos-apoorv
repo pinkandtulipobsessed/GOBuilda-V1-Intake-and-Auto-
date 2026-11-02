@@ -19,9 +19,6 @@ public class SideServosTeleOp extends LinearOpMode {
         left_servo.setPower(0);
         right_servo.setPower(0);
 
-        telemetry.addLine("Side Servos Ready");
-        telemetry.addLine("Both servos run continuously");
-        telemetry.update();
 
         waitForStart();
 
