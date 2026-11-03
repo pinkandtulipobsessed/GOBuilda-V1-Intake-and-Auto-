@@ -43,7 +43,6 @@ public class SideServosTeleOp extends LinearOpMode {
             idle();
         }
 
-        // Stop both servos when OpMode ends
         left_servo.setPower(0);
         right_servo.setPower(0);
     }
