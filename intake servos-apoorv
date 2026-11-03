@@ -19,17 +19,33 @@ public class SideServosTeleOp extends LinearOpMode {
         left_servo.setPower(0);
         right_servo.setPower(0);
 
+        telemetry.addLine("Side Servos Ready");
+        telemetry.update();
 
         waitForStart();
 
         while (opModeIsActive()) {
 
-            left_servo.setPower(0.7);
-            right_servo.setPower(0.7);
+            // Move the left bumpet to control the left servo
+            if (gamepad1.left_bumper) {
+                left_servo.setPower(0.7);
+            } else {
+                left_servo.setPower(0);
+            }
 
+            // Move the right bumper to control the right servo
+            if (gamepad1.right_bumper) {
+                right_servo.setPower(0.7);
+            } else {
+                right_servo.setPower(0);
+            }
+
+            idle();
         }
 
+        // Stop both servos when OpMode ends
         left_servo.setPower(0);
         right_servo.setPower(0);
     }
 }
+```
