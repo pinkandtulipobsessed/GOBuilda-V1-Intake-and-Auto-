@@ -1,0 +1,111 @@
+package org.firstinspires.ftc.teamcode;
+
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+
+/**
+ * TeleOp test of every motor on the hub's default PID ({@link RobotEncoderRevPID}).
+ *
+ * gamepad1 — mecanum drive (RUN_USING_ENCODER)
+ *   left stick Y  forward / back
+ *   left stick X  strafe
+ *   right stick X turn
+ *
+ * gamepad2 — shooter and intake (RUN_USING_ENCODER)
+ *   right stick Y  shooter speed (stick up = positive)
+ *   left stick Y   intake speed (stick up = positive)
+ *   right bumper   shooter full forward (overrides the stick while held)
+ *   Y              shooter full reverse
+ *   left bumper    intake full forward
+ *   A              intake full reverse
+ *
+ * Driver Station: Start+A = gamepad1, Start+B = gamepad2.
+ * Telemetry shows encoder ticks and ticks/sec. A live motor with a dead encoder
+ * stays at 0 ticks while its t/s stays near 0.
+ */
+@TeleOp(name = "Leage 0 WV", group = "Sample")
+public class SampleEncoderRevPID extends LinearOpMode {
+
+  private static final double STICK_DEADZONE = 0.05;
+
+    private DcMotor shooter;
+    private DcMotor intake;
+    private CRServo windmill;
+
+  @Override
+  public void runOpMode() {
+    RobotEncoderRevPID.bindFromLinearOpMode(this);
+    RobotEncoderRevPID.initRobot();
+    
+    windmill = hardwareMap.get(CRServo.class, "windmill");
+    intake = hardwareMap.get(DcMotor.class, "intake");
+    shooter = hardwareMap.get(DcMotor.class, "shooter");
+
+    shooter.setDirection(DcMotor.Direction.FORWARD);
+    shooter.setPower(0);
+    
+    intake.setDirection(DcMotor.Direction.FORWARD);
+    intake.setPower(0);
+        
+    windmill.setDirection(CRServo.Direction.REVERSE);
+    windmill.setPower(0);
+        
+    telemetry.addData("Status", "Ready — hub default PID (encoders on)");
+    telemetry.addData("Pad1", "L stick drive/strafe, R stick X turn");
+    telemetry.addData("Pad2", "R stick shooter, L stick intake");
+    telemetry.addData("Pad2 full", "RB / Y = shooter ±1, LB / A = intake ±1");
+    telemetry.addData("Tip", "On DS: Start+A = gamepad1, Start+B = gamepad2");
+    telemetry.update();
+    waitForStart();
+
+    while (opModeIsActive()) {
+      double forward = -gamepad1.left_stick_y;
+      double strafe = -gamepad1.left_stick_x;
+      double turn = gamepad1.right_stick_x;
+      RobotEncoderRevPID.driveArcade(forward, strafe, turn);
+
+      //shooter = applyDeadzone(-gamepad2.left_bumper);
+      if (gamepad2.left_bumper) {
+        shooter.setPower(0.52);
+      } else {
+        shooter.setPower(0);
+      }
+
+      
+      //intake = applyDeadzone(-gamepad2.right_bumper);
+      // Hold right bumper to run shooter
+      if (gamepad2.right_bumper) {
+          intake.setPower(0.9);
+      } else {
+          intake.setPower(0);
+      }
+      
+            if (gamepad2.a) {
+                 windmill.setPower(0.82);
+            } else {
+                windmill.setPower(0);
+            }
+  
+
+      //RobotEncoderRevPID.shooterPower(shooter);
+      //RobotEncoderRevPID.intakePower(intake);
+      //RobotEncoderRevPID.intakePower(windmill);
+
+      //telemetry.addData("cmd drive", "fwd %.2f  strafe %.2f  turn %.2f", forward, strafe, turn);
+      //telemetry.addData("cmd mech", "shooter %.2f  intake %.2f", shooter, intake);
+      //RobotEncoderRevPID.reportEncoders();
+      telemetry.update();
+    }
+
+    RobotEncoderRevPID.stopAll();
+  }
+
+  private static double applyDeadzone(double v) {
+    if (Math.abs(v) < STICK_DEADZONE) {
+      return 0;
+    }
+    return v;
+  }
+}
