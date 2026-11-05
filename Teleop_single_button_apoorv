@@ -5,8 +5,8 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.CRServo;
 
-@TeleOp(name = "Shooter2")
-public class Shooter2 extends LinearOpMode {
+@TeleOp(name = "Teleop_single_button_apoorv")
+public class Teleop_single_button_apoorv extends LinearOpMode {
 
     private DcMotor shooter;
     private DcMotor intake;
@@ -36,10 +36,7 @@ public class Shooter2 extends LinearOpMode {
         intake.setPower(0);
         windmill.setPower(0);
 
-        telemetry.addLine("Shooter Ready");
-        telemetry.addLine("Intake Ready");
-        telemetry.addLine("Windmill Ready");
-        telemetry.addLine("Mecanum Drive Ready");
+        telemetry.addLine("Ready");
         telemetry.update();
 
         waitForStart();
@@ -54,7 +51,7 @@ public class Shooter2 extends LinearOpMode {
 
             RobotEncoderRevPID.driveArcade(forward, strafe, turn);
 
-            if (gamepad1.left_bumper) {
+            if (gamepad2.left_bumper) {
 
                 shooter.setPower(SHOOTER_POWER);
 
@@ -75,18 +72,18 @@ public class Shooter2 extends LinearOpMode {
                 shooterStartTime = 0;
             }
 
-            if (gamepad1.right_bumper) {
+            if (gamepad2.right_bumper) {
                 intake.setPower(INTAKE_POWER);
             } else {
                 intake.setPower(0);
             }
 
-            if (gamepad1.a) {
+            if (gamepad2.a) {
                 windmill.setPower(WINDMILL_POWER);
             }
 
-            telemetry.addData("Shooter", gamepad1.left_bumper ? "ON" : "OFF");
-            telemetry.addData("Intake", gamepad1.right_bumper ? "ON" : "OFF");
+            telemetry.addData("Shooter", gamepad2.left_bumper ? "ON" : "OFF");
+            telemetry.addData("Intake", gamepad2.right_bumper ? "ON" : "OFF");
             telemetry.addData("Windmill", windmill.getPower());
             telemetry.update();
         }
