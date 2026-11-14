@@ -1,173 +1,205 @@
-
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.CRServo;
-import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
-import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 
-
-@Autonomous(name = "Anika_Autonomous_Shoot_and_Park")
+@Autonomous(name = "Anika_Autonomous_Shoot_and_Park_Odo")
 public class Windmill_Updated_Isnika extends LinearOpMode {
 
-private DcMotor left_front;
-private DcMotor left_back;
-private DcMotor right_back;
-private DcMotor right_front;
-private DcMotor shooter;
-private CRServo windmill;
+    private DcMotor left_front;
+    private DcMotor left_back;
+    private DcMotor right_back;
+    private DcMotor right_front;
+    private DcMotor shooter;
+    private CRServo windmill;
+    private GoBildaPinpointDriver pinpoint;
 
-@Override
-public void runOpMode() {
+    // Note: Your original POWER was -0.5, which means negative motor power drove your robot forward.
+    private final double DRIVE_SPEED = -0.5;
+    private final double TURN_SPEED = 0.4;
 
-double POWER = -0.5;
+    @Override
+    public void runOpMode() {
+        // Initialize motors & servos
+        left_front = hardwareMap.get(DcMotor.class, "left_front");
+        left_back = hardwareMap.get(DcMotor.class, "left_back");
+        right_back = hardwareMap.get(DcMotor.class, "right_back");
+        right_front = hardwareMap.get(DcMotor.class, "right_front");
+        shooter = hardwareMap.get(DcMotor.class, "shooter");
+        windmill = hardwareMap.get(CRServo.class, "windmill");
 
-// Initialize hardware
-left_front = hardwareMap.get(DcMotor.class, "left_front");
-left_back = hardwareMap.get(DcMotor.class, "left_back");
-right_back = hardwareMap.get(DcMotor.class, "right_back");
-right_front = hardwareMap.get(DcMotor.class, "right_front");
-shooter = hardwareMap.get(DcMotor.class, "shooter");
-windmill = hardwareMap.get(CRServo.class, "windmill");
+        // Initialize goBILDA Pinpoint Odometry Computer
+        pinpoint = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
 
-// Set motor directions
-left_front.setDirection(DcMotor.Direction.REVERSE);
-left_back.setDirection(DcMotor.Direction.REVERSE);
-right_back.setDirection(DcMotor.Direction.FORWARD);
-right_front.setDirection(DcMotor.Direction.FORWARD);
+        /*
+         * IMPORTANT: Tune these three Pinpoint settings to match your robot's physical build!
+         * 1. Offsets: Distance (in mm) of your X (forward) and Y (strafe) pods from the robot's center.
+         * 2. Resolution: Choose goBILDA_4_BAR_POD or goBILDA_SWINGARM_POD.
+         * 3. Directions: Set so driving forward increases X, and strafing left increases Y.
+         */
+        pinpoint.setOffsets(-84.0, -168.0, DistanceUnit.MM);
+        pinpoint.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
+        pinpoint.setEncoderDirections(
+                GoBildaPinpointDriver.EncoderDirection.FORWARD,
+                GoBildaPinpointDriver.EncoderDirection.FORWARD
+        );
 
-// Set braking behavior
-left_front.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-left_back.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-right_front.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-right_back.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        // Reset position to (0,0) and calibrate IMU (Robot MUST be completely still!)
+        pinpoint.resetPosAndIMU();
 
-// Initial status
-telemetry.addData("Status", "Ready - Hive Shoot and Park");
-telemetry.update();
+        // Set motor directions
+        left_front.setDirection(DcMotor.Direction.REVERSE);
+        left_back.setDirection(DcMotor.Direction.REVERSE);
+        right_back.setDirection(DcMotor.Direction.FORWARD);
+        right_front.setDirection(DcMotor.Direction.FORWARD);
 
-shooter.setPower(0);
-windmill.setPower(0);
+        // Set braking behavior
+        left_front.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        left_back.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        right_front.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        right_back.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-waitForStart();
+        shooter.setPower(0);
+        windmill.setPower(0);
 
-if (isStopRequested()) {
-  stopAll();
-  return;
-}
+        telemetry.addData("Status", "Ready - Hive Shoot and Park (Odometry)");
+        telemetry.update();
 
-// 1. Shoot into hive
-shooter.setPower(0.563);
-sleep(3300);
-windmill.setPower(-0.525);
-sleep(4200);
+        waitForStart();
+        if (isStopRequested()) {
+            stopAll();
+            return;
+        }
 
-windmill.setPower(0);
-shooter.setPower(0);
-sleep(500);
+        // 1. Shoot into hive (kept on timers since this is a flywheel/servo sequence)
+        shooter.setPower(0.563);
+        sleep(3300);
+        windmill.setPower(-0.525);
+        sleep(4200);
+        windmill.setPower(0);
+        shooter.setPower(0);
+        sleep(500);
 
-if (isStopRequested()) {
- stopAll();
- return;
-}
+        // --- ODOMETRY MOVEMENTS (Replace placeholder mm & degree values after testing) ---
 
-// 2. Drive forward toward the hive
-left_front.setPower(POWER);
-left_back.setPower(POWER);
-right_front.setPower(POWER);
-right_back.setPower(POWER);
-sleep(200);
+        // 2. Drive forward toward the hive (was 200ms)
+        driveDistance(150, DRIVE_SPEED);
 
-if (isStopRequested()) {
- stopAll();
- return;
-}
+        // 3. Turn left (was 400ms -> ~90 degrees)
+        turnToHeading(90, TURN_SPEED);
 
-// 3. Turn left
-right_front.setPower(-POWER);
-right_back.setPower(-POWER);
-left_back.setPower(POWER);
-left_front.setPower(POWER);
-sleep(400);
+        // 4. Drive forward toward the loading zone (was 850ms)
+        driveDistance(600, DRIVE_SPEED);
 
-if (isStopRequested()) {
- stopAll();
- return;
-}
+        // 5. Turn right back to 0 degrees (was 400ms)
+        turnToHeading(0, TURN_SPEED);
 
-// 4. Drive forward toward the loading zone
-left_front.setPower(POWER);
-left_back.setPower(POWER);
-right_front.setPower(POWER);
-right_back.setPower(POWER);
-sleep(850);
+        // 6. Drive forward toward the loading zone (was 1750ms)
+        driveDistance(1200, DRIVE_SPEED);
 
-if (isStopRequested()) {
- stopAll();
-return;
-}
+        // 7. Turn left (was 500ms at half speed -> ~45 degrees)
+        turnToHeading(45, TURN_SPEED * 0.5);
 
-// 5. Turn right
-right_front.setPower(POWER);
-right_back.setPower(POWER);
-left_back.setPower(-POWER);
-left_front.setPower(-POWER);
-sleep(400);
+        // 8. Drive forward into the loading zone (was 1200ms at half speed)
+        driveDistance(450, DRIVE_SPEED * 0.5);
 
-if (isStopRequested()) {
-stopAll();
-return;
-}
+        // 9. Stop everything
+        stopAll();
+        telemetry.addData("Status", "Auto done");
+        telemetry.update();
+        sleep(300);
+    }
 
-// 6. Drive forward toward the loading zone
-left_front.setPower(POWER);
-left_back.setPower(POWER);
-right_front.setPower(POWER);
-right_back.setPower(POWER);
-sleep(1750);
+    /**
+     * Drives straight for a target distance in millimeters using Pinpoint X/Y coordinates.
+     */
+    private void driveDistance(double targetMm, double power) {
+        pinpoint.update();
+        Pose2D startPose = pinpoint.getPosition();
+        double startX = startPose.getX(DistanceUnit.MM);
+        double startY = startPose.getY(DistanceUnit.MM);
+        double distanceTraveled = 0;
 
-if (isStopRequested()) {
-stopAll();
-return;
-}
+        while (opModeIsActive() && distanceTraveled < targetMm) {
+            pinpoint.update();
+            Pose2D currentPose = pinpoint.getPosition();
+            double currentX = currentPose.getX(DistanceUnit.MM);
+            double currentY = currentPose.getY(DistanceUnit.MM);
 
-// 7. Turn left
-right_front.setPower(-0.5*POWER);
-right_back.setPower(-0.5*POWER);
-left_back.setPower(0.5*POWER);
-left_front.setPower(0.5*POWER);
-sleep(500);
+            // Calculate straight-line distance from where this step started
+            distanceTraveled = Math.hypot(currentX - startX, currentY - startY);
 
-if (isStopRequested()) {
-stopAll();
-return;
-}
+            left_front.setPower(power);
+            left_back.setPower(power);
+            right_front.setPower(power);
+            right_back.setPower(power);
 
-// 8. Drive forward toward the loading zone
-left_front.setPower(0.5*POWER);
-left_back.setPower(0.5*POWER);
-right_front.setPower(0.5*POWER);
-right_back.setPower(0.5*POWER);
-sleep(1200);
+            telemetry.addData("Driving (mm)", "%.1f / %.1f", distanceTraveled, targetMm);
+            telemetry.update();
+        }
+        stopDrive();
+    }
 
-// 9. Stop everything
-stopAll();
+    /**
+     * Turns the robot to an absolute field heading in degrees (0 = starting direction, + = left, - = right).
+     */
+    private void turnToHeading(double targetDegrees, double maxSpeed) {
+        while (opModeIsActive()) {
+            pinpoint.update();
+            double currentHeading = pinpoint.getPosition().getHeading(AngleUnit.DEGREES);
+            double error = normalizeAngle(targetDegrees - currentHeading);
 
-telemetry.addData("Status", "Auto done");
-telemetry.update();
+            // Stop turning once within 1.5 degrees of target
+            if (Math.abs(error) <= 1.5) {
+                break;
+            }
 
-sleep(300);
-}
+            // Proportional turn speed (slows down as it approaches the target angle)
+            double turnPower = error * 0.015;
+            // Clamp to maxSpeed and enforce a minimum power so motors don't stall
+            if (turnPower > 0) {
+                turnPower = Math.min(maxSpeed, Math.max(0.18, turnPower));
+            } else {
+                turnPower = Math.max(-maxSpeed, Math.min(-0.18, turnPower));
+            }
 
-// Stop all motors and servos
-private void stopAll() {
-left_front.setPower(0);
-left_back.setPower(0);
-right_front.setPower(0);
-right_back.setPower(0);
-shooter.setPower(0);
-windmill.setPower(0);
-}
+            // Note: Matches your original left-turn polarity (left = negative/POWER, right = positive/-POWER)
+            left_front.setPower(-turnPower);
+            left_back.setPower(-turnPower);
+            right_front.setPower(turnPower);
+            right_back.setPower(turnPower);
+
+            telemetry.addData("Turning (deg)", "Current: %.1f | Target: %.1f", currentHeading, targetDegrees);
+            telemetry.update();
+        }
+        stopDrive();
+    }
+
+    /**
+     * Keeps angle errors between -180 and +180 degrees so the robot always turns the shortest direction.
+     */
+    private double normalizeAngle(double degrees) {
+        while (degrees > 180) degrees -= 360;
+        while (degrees < -180) degrees += 360;
+        return degrees;
+    }
+
+    private void stopDrive() {
+        left_front.setPower(0);
+        left_back.setPower(0);
+        right_front.setPower(0);
+        right_back.setPower(0);
+    }
+
+    private void stopAll() {
+        stopDrive();
+        shooter.setPower(0);
+        windmill.setPower(0);
+    }
 }
