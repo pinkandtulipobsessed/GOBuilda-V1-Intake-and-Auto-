@@ -1,0 +1,75 @@
+
+package org.firstinspires.ftc.teamcode;
+
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+
+@Autonomous(name = "Anika_Autonomous_Shoot_and_Park")
+public class Windmill_Updated_Isnika extends LinearOpMode {
+
+    @Override
+    public void runOpMode() {
+
+        // Initialize robot and Pinpoint
+        RobotMyBlocks.bindFromLinearOpMode(this);
+        RobotPinpointMyBlocks.bindFromLinearOpMode(this);
+
+        RobotMyBlocks.initRobot();
+        RobotPinpointMyBlocks.initPinpoint();
+        RobotPinpointMyBlocks.setPose(0, 0, 0);
+
+        telemetry.setMsTransmissionInterval(100);
+        telemetry.addData("Status", "Ready");
+        telemetry.update();
+
+        waitForStart();
+
+        if (!opModeIsActive()) {
+            return;
+        }
+
+        // Drive forward
+        RobotPinpointMyBlocks.driveForwardOdo(10.0, 0.4);
+
+        if (!opModeIsActive()) return;
+
+        // Turn left
+        RobotPinpointMyBlocks.turnDegreesOdo(90, 0.15);
+
+        if (!opModeIsActive()) return;
+
+        // Drive forward
+        RobotPinpointMyBlocks.driveForwardOdo(19.0, 0.4);
+
+        if (!opModeIsActive()) return;
+
+        // Turn right
+        RobotPinpointMyBlocks.turnDegreesOdo(-90, 0.15);
+
+        if (!opModeIsActive()) return;
+
+        // Drive forward
+        RobotPinpointMyBlocks.driveForwardOdo(18.0, 0.4);
+
+        if (!opModeIsActive()) return;
+
+        // Turn left
+        RobotPinpointMyBlocks.turnDegreesOdo(90, 0.15);
+
+        if (!opModeIsActive()) return;
+
+        // Final drive
+        RobotPinpointMyBlocks.driveForwardOdo(12.0, 0.25);
+
+        // Stop drive and report final position
+        RobotPinpointMyBlocks.stopDriveOdo();
+        RobotMyBlocks.stopDrive();
+
+        RobotPinpointMyBlocks.reportPose();
+
+        telemetry.addData("Status", "Auto done");
+        telemetry.update();
+
+        sleep(500);
+    }
+}
