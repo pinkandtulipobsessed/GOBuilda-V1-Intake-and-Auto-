@@ -104,7 +104,7 @@ public class pinpoint extends LinearOpMode {
             return;
         }
 
-        // SHOOT PRELOADED BALLS
+        // 1. SHOOT PRELOADED BALLS INTO HIVE
         shooter.setPower(SHOOTER_POWER);
 
         if (!waitForShooterSpeed()) {
@@ -136,7 +136,7 @@ public class pinpoint extends LinearOpMode {
 
         sleep(300);
 
-        // DRIVE TOWARD GARDEN
+        // 2. MOVE AWAY FROM HIVE
         RobotPinpointMyBlocks.driveForwardOdo(-10.0, 0.4);
 
         if (!opModeIsActive()) {
@@ -144,7 +144,7 @@ public class pinpoint extends LinearOpMode {
             return;
         }
 
-        // TURN TOWARD GARDEN
+        // 3. TURN TOWARD GARDEN
         RobotPinpointMyBlocks.turnDegreesOdo(65, 0.4);
 
         if (!opModeIsActive()) {
@@ -152,7 +152,7 @@ public class pinpoint extends LinearOpMode {
             return;
         }
 
-        // DRIVE TO GARDEN
+        // 4. APPROACH GARDEN INTAKE-FIRST
         RobotPinpointMyBlocks.driveForwardOdo(23.0, 0.4);
 
         if (!opModeIsActive()) {
@@ -160,7 +160,7 @@ public class pinpoint extends LinearOpMode {
             return;
         }
 
-        // ALIGN WITH GARDEN
+        // 5. ALIGN INTAKE WITH GARDEN
         RobotPinpointMyBlocks.turnDegreesOdo(40, 0.4);
 
         if (!opModeIsActive()) {
@@ -168,7 +168,7 @@ public class pinpoint extends LinearOpMode {
             return;
         }
 
-        // INTAKE WHILE DRIVING FORWARD THROUGH GARDEN
+        // 6. INTAKE WHILE MOVING FORWARD THROUGH GARDEN
         intake.setPower(INTAKE_POWER);
 
         RobotPinpointMyBlocks.driveForwardOdo(12.0, 0.2);
@@ -180,7 +180,7 @@ public class pinpoint extends LinearOpMode {
             return;
         }
 
-        // TURN TOWARD PARKING ZONE
+        // 7. TURN TOWARD PARKING ZONE
         RobotPinpointMyBlocks.turnDegreesOdo(50, 0.2);
 
         if (!opModeIsActive()) {
@@ -188,7 +188,7 @@ public class pinpoint extends LinearOpMode {
             return;
         }
 
-        // DRIVE TOWARD PARKING ZONE
+        // 8. DRIVE TO PARKING ZONE
         RobotPinpointMyBlocks.driveForwardOdo(65.0, 0.3);
 
         if (!opModeIsActive()) {
@@ -196,7 +196,7 @@ public class pinpoint extends LinearOpMode {
             return;
         }
 
-        // FINAL ALIGNMENT
+        // 9. FINAL ALIGNMENT
         RobotPinpointMyBlocks.strafeRightOdo(-3.0, 0.35);
 
         if (!opModeIsActive()) {
@@ -204,7 +204,7 @@ public class pinpoint extends LinearOpMode {
             return;
         }
 
-        // STOP EVERYTHING
+        // 10. STOP EVERYTHING
         stopAll();
 
         RobotPinpointMyBlocks.reportPose();
@@ -215,4 +215,3 @@ public class pinpoint extends LinearOpMode {
         sleep(500);
     }
 }
-
