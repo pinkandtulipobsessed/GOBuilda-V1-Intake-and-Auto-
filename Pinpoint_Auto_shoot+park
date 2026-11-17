@@ -1,0 +1,202 @@
+
+package org.firstinspires.ftc.teamcode;
+
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.util.ElapsedTime;
+
+@Autonomous(name = "pinpoint")
+public class pinpoint extends LinearOpMode {
+
+    private DcMotorEx shooter;
+    private CRServo windmill;
+
+    private static final double SHOOTER_POWER = 0.55;
+    private static final double TARGET_VELOCITY = 1220;
+    private static final double WINDMILL_POWER = -0.50;
+
+    // Wait until shooter reaches target velocity
+    private boolean waitForShooterSpeed() {
+
+        ElapsedTime timer = new ElapsedTime();
+        ElapsedTime stableTimer = new ElapsedTime();
+
+        boolean reachedSpeed = false;
+
+        while (opModeIsActive()) {
+
+            double velocity = Math.abs(shooter.getVelocity());
+
+            telemetry.addData("Shooter velocity", velocity);
+            telemetry.addData("Target velocity", TARGET_VELOCITY);
+            telemetry.update();
+
+            if (velocity >= TARGET_VELOCITY) {
+
+                if (!reachedSpeed) {
+                    stableTimer.reset();
+                    reachedSpeed = true;
+                }
+
+                if (stableTimer.seconds() >= 0.3) {
+                    return true;
+                }
+
+            } else {
+                reachedSpeed = false;
+            }
+
+            if (timer.seconds() >= 7.0) {
+                return false;
+            }
+
+            idle();
+        }
+
+        return false;
+    }
+
+    // Stop all motors and servos
+    private void stopAll() {
+        shooter.setPower(0);
+        windmill.setPower(0);
+        RobotPinpointMyBlocks.stopDriveOdo();
+        RobotMyBlocks.stopDrive();
+    }
+
+    @Override
+    public void runOpMode() {
+
+        // Initialize robot and Pinpoint
+        RobotMyBlocks.bindFromLinearOpMode(this);
+        RobotPinpointMyBlocks.bindFromLinearOpMode(this);
+
+        RobotMyBlocks.initRobot();
+        RobotPinpointMyBlocks.initPinpoint();
+        RobotPinpointMyBlocks.setPose(0, 0, 0);
+
+        // Initialize shooter and windmill
+        shooter = hardwareMap.get(DcMotorEx.class, "shooter");
+        windmill = hardwareMap.get(CRServo.class, "windmill");
+
+        shooter.setPower(0);
+        windmill.setPower(0);
+
+        telemetry.setMsTransmissionInterval(100);
+        telemetry.addData("Status", "Ready");
+        telemetry.update();
+
+        waitForStart();
+
+        if (!opModeIsActive()) {
+            stopAll();
+            return;
+        }
+
+        // Shooting sequence
+        shooter.setPower(SHOOTER_POWER);
+
+        if (!waitForShooterSpeed()) {
+            stopAll();
+            telemetry.addData("Status", "Shooter failed to reach speed");
+            telemetry.update();
+            return;
+        }
+
+        windmill.setPower(WINDMILL_POWER);
+
+        ElapsedTime shootingTimer = new ElapsedTime();
+
+        while (opModeIsActive() && shootingTimer.seconds() < 4.0) {
+            telemetry.addData("Shooter velocity",
+                    Math.abs(shooter.getVelocity()));
+            telemetry.addData("Windmill", "ON");
+            telemetry.update();
+            idle();
+        }
+
+        windmill.setPower(0);
+        shooter.setPower(0);
+
+        if (!opModeIsActive()) {
+            stopAll();
+            return;
+        }
+
+        sleep(300);
+
+        // Drive forward toward the hive
+        RobotPinpointMyBlocks.driveForwardOdo(-10.0, 0.4);
+
+        if (!opModeIsActive()) {
+            stopAll();
+            return;
+        }
+
+        // Turn left
+        RobotPinpointMyBlocks.turnDegreesOdo(65, 0.4);
+
+        if (!opModeIsActive()) {
+            stopAll();
+            return;
+        }
+
+        // Drive toward the loading zone
+        RobotPinpointMyBlocks.driveForwardOdo(23.0, 0.4);
+
+        if (!opModeIsActive()) {
+            stopAll();
+            return;
+        }
+
+        // Turn right
+        RobotPinpointMyBlocks.turnDegreesOdo(40, 0.4);
+
+        if (!opModeIsActive()) {
+            stopAll();
+            return;
+        }
+
+        // Drive forward toward the loading zone
+        RobotPinpointMyBlocks.driveForwardOdo(18.0, 0.4);
+
+        if (!opModeIsActive()) {
+            stopAll();
+            return;
+        }
+
+        // Turn left
+        RobotPinpointMyBlocks.turnDegreesOdo(50, 0.2);
+
+        if (!opModeIsActive()) {
+            stopAll();
+            return;
+        }
+
+        // Final drive
+        RobotPinpointMyBlocks.driveForwardOdo(65.0, 0.3);
+        
+        if (!opModeIsActive()) {
+            stopAll();
+            return;
+        }
+        
+        RobotPinpointMyBlocks.strafeRightOdo(-3.0, 0.35);
+        
+        if (!opModeIsActive()) {
+            stopAll();
+            return;
+        }
+
+        // Stop all motors and report final position
+        stopAll();
+        RobotPinpointMyBlocks.reportPose();
+
+        telemetry.addData("Status", "Auto done");
+        telemetry.update();
+
+        sleep(500);
+    }
+}
