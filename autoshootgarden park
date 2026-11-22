@@ -20,7 +20,7 @@ public class pinpoint extends LinearOpMode {
     private static final double WINDMILL_POWER = -0.50;
     private static final double INTAKE_POWER = 0.9;
 
-    // Wait until shooter reaches target velocity
+    // Wait for shooter to reach target velocity
     private boolean waitForShooterSpeed() {
 
         ElapsedTime timer = new ElapsedTime();
@@ -66,6 +66,7 @@ public class pinpoint extends LinearOpMode {
         shooter.setPower(0);
         intake.setPower(0);
         windmill.setPower(0);
+
         RobotPinpointMyBlocks.stopDriveOdo();
         RobotMyBlocks.stopDrive();
     }
@@ -79,6 +80,7 @@ public class pinpoint extends LinearOpMode {
 
         RobotMyBlocks.initRobot();
         RobotPinpointMyBlocks.initPinpoint();
+
         RobotPinpointMyBlocks.setPose(0, 0, 0);
 
         // Initialize shooter, intake, and windmill
@@ -104,7 +106,7 @@ public class pinpoint extends LinearOpMode {
             return;
         }
 
-        // 1. SHOOT PRELOADED BALLS INTO HIVE
+        // 1. SHOOT PRELOADED BALLS
         shooter.setPower(SHOOTER_POWER);
 
         if (!waitForShooterSpeed()) {
@@ -119,8 +121,10 @@ public class pinpoint extends LinearOpMode {
         ElapsedTime shootingTimer = new ElapsedTime();
 
         while (opModeIsActive() && shootingTimer.seconds() < 4.0) {
-            telemetry.addData("Shooter velocity",
-                    Math.abs(shooter.getVelocity()));
+            telemetry.addData(
+                "Shooter velocity",
+                Math.abs(shooter.getVelocity())
+            );
             telemetry.addData("Windmill", "ON");
             telemetry.update();
             idle();
@@ -136,15 +140,7 @@ public class pinpoint extends LinearOpMode {
 
         sleep(300);
 
-        // 2. MOVE AWAY FROM HIVE
-        RobotPinpointMyBlocks.driveForwardOdo(-10.0, 0.4);
-
-        if (!opModeIsActive()) {
-            stopAll();
-            return;
-        }
-
-        // 3. TURN TOWARD GARDEN
+        // 2. TURN TOWARD GARDEN
         RobotPinpointMyBlocks.turnDegreesOdo(65, 0.4);
 
         if (!opModeIsActive()) {
@@ -152,26 +148,10 @@ public class pinpoint extends LinearOpMode {
             return;
         }
 
-        // 4. APPROACH GARDEN INTAKE-FIRST
-        RobotPinpointMyBlocks.driveForwardOdo(23.0, 0.4);
-
-        if (!opModeIsActive()) {
-            stopAll();
-            return;
-        }
-
-        // 5. ALIGN INTAKE WITH GARDEN
-        RobotPinpointMyBlocks.turnDegreesOdo(40, 0.4);
-
-        if (!opModeIsActive()) {
-            stopAll();
-            return;
-        }
-
-        // 6. INTAKE WHILE MOVING FORWARD THROUGH GARDEN
+        // 3. DRIVE FORWARD WHILE INTAKING
         intake.setPower(INTAKE_POWER);
 
-        RobotPinpointMyBlocks.driveForwardOdo(12.0, 0.2);
+        RobotPinpointMyBlocks.driveForwardOdo(35.0, 0.35);
 
         intake.setPower(0);
 
@@ -180,31 +160,47 @@ public class pinpoint extends LinearOpMode {
             return;
         }
 
-        // 7. TURN TOWARD PARKING ZONE
-        RobotPinpointMyBlocks.turnDegreesOdo(50, 0.2);
+        // 4. BACK UP
+        RobotPinpointMyBlocks.driveForwardOdo(-15.0, 0.35);
 
         if (!opModeIsActive()) {
             stopAll();
             return;
         }
 
-        // 8. DRIVE TO PARKING ZONE
-        RobotPinpointMyBlocks.driveForwardOdo(65.0, 0.3);
+        // 5. TURN
+        RobotPinpointMyBlocks.turnDegreesOdo(90, 0.35);
 
         if (!opModeIsActive()) {
             stopAll();
             return;
         }
 
-        // 9. FINAL ALIGNMENT
-        RobotPinpointMyBlocks.strafeRightOdo(-3.0, 0.35);
+        // 6. DRIVE FORWARD
+        RobotPinpointMyBlocks.driveForwardOdo(30.0, 0.35);
 
         if (!opModeIsActive()) {
             stopAll();
             return;
         }
 
-        // 10. STOP EVERYTHING
+        // 7. TURN AGAIN
+        RobotPinpointMyBlocks.turnDegreesOdo(90, 0.35);
+
+        if (!opModeIsActive()) {
+            stopAll();
+            return;
+        }
+
+        // 8. DRIVE FORWARD
+        RobotPinpointMyBlocks.driveForwardOdo(25.0, 0.35);
+
+        if (!opModeIsActive()) {
+            stopAll();
+            return;
+        }
+
+        // 9. PARK AND STOP
         stopAll();
 
         RobotPinpointMyBlocks.reportPose();
